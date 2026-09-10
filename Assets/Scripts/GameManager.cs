@@ -991,7 +991,7 @@ public class GameManager : MonoBehaviour
 
             if (formaPrecisaActiva != null && Vector2.Distance(pos, formaPrecisaActiva.transform.position) < p.radioHitbox + formaPrecisaActiva.radioHitbox)
             {
-                formaPrecisaActiva.RecibirGolpe($"proyectil_fase{EscaladaPatronesFase1(tPelea)}");
+                formaPrecisaActiva.RecibirGolpe($"proyectil_fase{TierPatronesActualNivel2(tPelea)}");
                 DevolverProyectil(i);
             }
         }
@@ -1348,6 +1348,18 @@ public class GameManager : MonoBehaviour
     public float FraccionVidaBossNivel2 => vidaBossMaxNivel2 > 0f ? Mathf.Clamp01(vidaBossNivel2 / vidaBossMaxNivel2) : 0f;
     bool bossColapsadoNivel2;
     public bool BossColapsadoNivel2 => bossColapsadoNivel2;
+    /// <summary>
+    /// Tier de EscaladaPatronesFase1 congelado al momento del colapso
+    /// (revisión nocturna, Prioridad 1a — dato real: en la única corrida
+    /// completa, el boss colapsó a los 47.5s pero el jugador siguió
+    /// muriendo a manos de patrones fase 3/4 hasta los 80s, sin ganar nada
+    /// por seguir vivo). El latch de Fase 6 (ForzarColapsoBossNivel2)
+    /// resuelve el caso "jugador lento" forzando el colapso a los 80s;
+    /// esto resuelve el caso "jugador rápido", que es el que de verdad se
+    /// dio. Ver TierPatronesActualNivel2 — EscaladaPatronesFase1 en sí NO
+    /// se toca (sigue pura en t, sus tests existentes no cambian).
+    /// </summary>
+    int tierPatronesAlColapsarNivel2 = 1;
 
     public GameObject panelVidaBossNivel2;
     public Image barraVidaBossFillNivel2;
@@ -1373,7 +1385,45 @@ public class GameManager : MonoBehaviour
         if (vidaBossNivel2 <= umbralColapsoBossNivel2 && !bossColapsadoNivel2)
         {
             bossColapsadoNivel2 = true;
-            Telemetria.Registrar(tPelea, "boss_colapso_nivel2", nivelFever, comboOrbes, 0, orbesActivos);
+            tierPatronesAlColapsarNivel2 = EscaladaPatronesFase1(tPelea);
+            Telemetria.Registrar(tPelea, "boss_colapso_nivel2", nivelFever, comboOrbes, 0, orbesActivos, $"tierCongelado={tierPatronesAlColapsarNivel2}");
+            ReaccionColapsoBossNivel2();
+        }
+    }
+
+    /// <summary>Tier de patrones que hay que disparar AHORA — congelado desde el colapso en vez de seguir escalando con el tiempo (ver el comentario de tierPatronesAlColapsarNivel2). Envuelve a EscaladaPatronesFase1 en vez de modificarla: esa sigue pura en t para sus propios tests.</summary>
+    int TierPatronesActualNivel2(float t) => bossColapsadoNivel2 ? tierPatronesAlColapsarNivel2 : EscaladaPatronesFase1(t);
+
+    // Prioridad 1b (revisión nocturna): el tramo entre el colapso y la
+    // escalada de privilegios (0-32s de espera según cuándo colapsó)
+    // tiene que LEERSE como "ya gané, estoy aguantando el final" — sin
+    // esto, el jugador solo siente que el juego lo sigue castigando sin
+    // motivo (murió ahí en la única corrida real que tenemos). Reusa el
+    // shader de glitch existente a intensidad BAJA Y CONSTANTE (no el
+    // pico de la transformación real) — "dañado", no "roto". Cadencia más
+    // errática (rango de espera más ANCHO, no necesariamente más corto)
+    // en vez de tocar qué patrones salen o cuánto dañan — no es un cambio
+    // de dificultad, es un cambio de ritmo/lectura.
+    [Header("Nivel 2 — boss agonizante tras el colapso (Prioridad 1b, revisión nocturna)")]
+    public float esperaMinAgonicaNivel2 = 0.7f;
+    public float esperaMaxAgonicaNivel2 = 2.6f;
+    public float intensidadGlitchAgonicoNivel2 = 0.22f;
+
+    void ReaccionColapsoBossNivel2()
+    {
+        Vector2 posBoss = PosicionOrigenBoss();
+        EfectosVisuales.Instancia?.Popup(posBoss + Vector2.up * 0.7f, "¡COLAPSA!", ColorDanoBossNivel2, 1.8f);
+        EfectosVisuales.Instancia?.Chispas(posBoss, ColorDanoBossNivel2, 20, 3.5f);
+        CameraPunch.Instancia?.Golpear();
+        BeepSynth.Instancia?.Beep(70f, 0.5f, BeepSynth.Onda.Sierra, 0.3f); // grave y largo — distinto de cualquier beep de golpe normal, para que el momento se distinga
+
+        if (administradorActivo != null && administradorActivo.sr != null && materialCorrupcionGlitchNivel2 != null)
+        {
+            administradorActivo.sr.sharedMaterial = materialCorrupcionGlitchNivel2;
+            var mpb = new MaterialPropertyBlock();
+            administradorActivo.sr.GetPropertyBlock(mpb);
+            mpb.SetFloat(IDIntensidadGlitchNivel2, intensidadGlitchAgonicoNivel2);
+            administradorActivo.sr.SetPropertyBlock(mpb);
         }
     }
 
@@ -1878,9 +1928,15 @@ public class GameManager : MonoBehaviour
         // no por umbral de vida", para no perder la sincronía musical.
         while (PeleaActiva && tPelea < duracionFase1Nivel2)
         {
-            int fase = EscaladaPatronesFase1(tPelea);
+            // TierPatronesActualNivel2 (no EscaladaPatronesFase1 directo,
+            // Prioridad 1a revisión nocturna): si el boss ya colapsó, se
+            // queda en el tier que tenía en ese momento en vez de seguir
+            // escalando con tPelea — dato real: el jugador que gana rápido
+            // no tiene por qué seguir peleando contra una dificultad que
+            // sigue subiendo sin motivo.
+            int fase = TierPatronesActualNivel2(tPelea);
             string patron = DispararPatronDeFase(fase);
-            Telemetria.Registrar(tPelea, "pelea_patron", nivelFever, comboOrbes, 0, orbesActivos, $"fase={fase};patron={patron}");
+            Telemetria.Registrar(tPelea, "pelea_patron", nivelFever, comboOrbes, 0, orbesActivos, $"fase={fase};patron={patron};colapsado={bossColapsadoNivel2}");
             yield return new WaitForSeconds(EsperaClampeadaNivel2(fase));
         }
         if (!PeleaActiva) yield break;
@@ -1916,14 +1972,21 @@ public class GameManager : MonoBehaviour
     /// implícito vía el campo) para poder testearla sin tickear la
     /// corrutina (ver VerificarEscaladaPrivilegiosNivel2.cs).
     /// </summary>
-    float EsperaClampeadaNivel2(int fase) => Mathf.Min(EsperaEntrePatrones(fase), Mathf.Max(0.05f, duracionFase1Nivel2 - tPelea));
+    /// <summary>Colapsado, usa el rango agónico (más ANCHO, no necesariamente más corto que EsperaEntrePatrones — errático, no más difícil en promedio) en vez de la escalada normal por fase. Ver el comentario de esperaMinAgonicaNivel2.</summary>
+    float EsperaClampeadaNivel2(int fase)
+    {
+        float espera = bossColapsadoNivel2 ? Random.Range(esperaMinAgonicaNivel2, esperaMaxAgonicaNivel2) : EsperaEntrePatrones(fase);
+        return Mathf.Min(espera, Mathf.Max(0.05f, duracionFase1Nivel2 - tPelea));
+    }
 
     /// <summary>Mitad del latch de arriba: la sincronía con la música importa más que la precisión del umbral de vida.</summary>
     void ForzarColapsoBossNivel2()
     {
         vidaBossNivel2 = umbralColapsoBossNivel2;
         bossColapsadoNivel2 = true;
-        Telemetria.Registrar(tPelea, "boss_colapso_nivel2", nivelFever, comboOrbes, 0, orbesActivos, "forzado_por_tiempo=true");
+        tierPatronesAlColapsarNivel2 = EscaladaPatronesFase1(tPelea); // en la práctica ya es 5 acá (tPelea≈80s) — el loop de patrones está por terminar de todos modos, esto es solo consistencia con el camino orgánico
+        Telemetria.Registrar(tPelea, "boss_colapso_nivel2", nivelFever, comboOrbes, 0, orbesActivos, $"forzado_por_tiempo=true;tierCongelado={tierPatronesAlColapsarNivel2}");
+        ReaccionColapsoBossNivel2();
     }
 
     // Se acorta con cada fase de EscaladaPatronesFase1 — a partir de fase
@@ -2463,7 +2526,7 @@ public class GameManager : MonoBehaviour
             // arruinando el balance por fase del punto 10.
             string razon = superAdministradorActivo
                 ? $"laser_fase2_superadmin;climax={enSuperAdministradorClimaxNivel2}"
-                : $"laser_fase{EscaladaPatronesFase1(tPelea)}";
+                : $"laser_fase{TierPatronesActualNivel2(tPelea)}";
             formaPrecisaActiva.RecibirGolpe(razon);
         }
     }
@@ -2502,7 +2565,7 @@ public class GameManager : MonoBehaviour
         {
             string razon = superAdministradorActivo
                 ? $"laser_fase2_superadmin;climax={enSuperAdministradorClimaxNivel2};rotado=true"
-                : $"laser_fase{EscaladaPatronesFase1(tPelea)};rotado=true";
+                : $"laser_fase{TierPatronesActualNivel2(tPelea)};rotado=true";
             formaPrecisaActiva.RecibirGolpe(razon);
         }
     }
