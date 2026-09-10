@@ -1573,6 +1573,14 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void IniciarEscaladaPrivilegiosNivel2()
     {
+        // Bug real (revisión nocturna, Prioridad 3, mismo motivo que
+        // PeleaNivel2Victoria): un proyectil/pared láser que ya estaba en
+        // el aire de un patrón anterior podía seguir resolviendo su
+        // impacto DURANTE la terminal — el jugador ya "ganó" este tramo
+        // (los patrones dejan de dispararse acá), no tiene sentido que lo
+        // sigan pudiendo golpear mientras mira una secuencia narrativa.
+        LimpiarProyectiles();
+        LimpiarLaseresActivosNivel2();
         escaladaPrivilegiosCoroutine = StartCoroutine(EscaladaPrivilegiosNivel2());
     }
 

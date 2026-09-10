@@ -28,6 +28,7 @@ public static class VerificarLimpiezaLaseresNivel2
         PruebaVictoriaNoDejaLaseresVivos();
         PruebaTerminarPeleaNoDejaLaseresVivos();
         PruebaLimpiarPartidaNoDejaLaseresVivos();
+        PruebaEscaladaPrivilegiosLimpiaLaseresPendientes();
 
         Debug.Log("Verificación de limpieza de láseres de Nivel 2 completa.");
     }
@@ -113,6 +114,28 @@ public static class VerificarLimpiezaLaseresNivel2
             Debug.LogError("FALLÓ: volver al menú (Pausa -> Menú) a mitad de un telegraph no debería dejar paredes láser vivas de la partida anterior.");
         else
             Debug.Log("OK: volver al menú limpia cualquier pared láser que hubiera quedado viva.");
+    }
+
+    /// <summary>Mismo bug, otro punto de transición: un proyectil/pared de un patrón anterior no debería poder golpear DURANTE la terminal — el jugador ya "ganó" ese tramo.</summary>
+    static void PruebaEscaladaPrivilegiosLimpiaLaseresPendientes()
+    {
+        var gm = AbrirEscenaFresca();
+        var boss = Object.Instantiate(gm.administradorPrefab, new Vector3(0f, gm.mitadAlto * 0.6f, 0f), Quaternion.identity);
+        typeof(GameManager).GetField("administradorActivo", Flags).SetValue(gm, boss);
+        CrearMurosDePrueba(gm, 2);
+        gm.DispararProyectil(Vector2.zero, Vector2.up, Color.white);
+        int murosAntes = Object.FindObjectsByType<LaserHazard>(FindObjectsSortMode.None).Length;
+        int proyectilesAntes = gm.ProyectilesActivosCount;
+
+        typeof(GameManager).GetMethod("IniciarEscaladaPrivilegiosNivel2", Flags).Invoke(gm, null);
+
+        int murosDespues = Object.FindObjectsByType<LaserHazard>(FindObjectsSortMode.None).Length;
+        int proyectilesDespues = gm.ProyectilesActivosCount;
+        Debug.Log($"Antes de arrancar la escalada: muros={murosAntes} (esperado 2), proyectiles={proyectilesAntes} (esperado 1). Después: muros={murosDespues} (esperado 0), proyectiles={proyectilesDespues} (esperado 0)");
+        if (murosAntes != 2 || proyectilesAntes != 1 || murosDespues != 0 || proyectilesDespues != 0)
+            Debug.LogError("FALLÓ: arrancar la escalada de privilegios debería limpiar cualquier proyectil/pared pendiente de un patrón anterior.");
+        else
+            Debug.Log("OK: la escalada de privilegios arranca sin proyectiles ni paredes pendientes que puedan golpear durante la secuencia narrativa.");
     }
 
     static void Invocar(object obj, string metodo) =>
