@@ -1309,6 +1309,17 @@ public class GameManager : MonoBehaviour
     void GenerarOrbesDelBossNivel2()
     {
         Vector2 centro = PosicionOrigenBoss();
+        // Claridad (revisión nocturna, Prioridad 2): antes aparecían en
+        // silencio — sin ningún aviso en el momento/lugar donde salen, un
+        // jugador nuevo podía no asociar "pulso potente -> el boss soltó
+        // algo ahí" y encontrarlos de casualidad en vez de leerlos como
+        // recompensa/riesgo real (pedido explícito: "¿se entiende por qué
+        // el boss suelta orbes cerca suyo?"). Mismo lenguaje visual que ya
+        // usa el resto del juego para "algo apareció acá".
+        EfectosVisuales.Instancia?.Onda(centro, ColorOrbeNivel2, 1.2f);
+        EfectosVisuales.Instancia?.Chispas(centro, ColorOrbeNivel2, 16, 3f);
+        BeepSynth.Instancia?.Beep(500f, 0.12f, BeepSynth.Onda.Seno, 0.18f);
+
         for (int i = 0; i < orbesPorPulsoPotenteNivel2; i++)
         {
             float ang = Random.Range(0f, Mathf.PI * 2f);
@@ -1647,6 +1658,12 @@ public class GameManager : MonoBehaviour
         CameraPunch.Instancia?.Golpear();
         BeepSynth.Instancia?.Beep(55f, 0.6f, BeepSynth.Onda.Sierra, 0.3f);
         BeepSynth.Instancia?.Beep(880f, 0.3f, BeepSynth.Onda.Cuadrada, 0.22f);
+        // Claridad (revisión nocturna, Prioridad 2): sin la barra de vida
+        // ni orbes, un jugador nuevo puede seguir esperando poder atacar
+        // sin que nada le diga por qué dejó de pasar algo — "es confusión,
+        // no diseño" (pedido explícito). Este popup deja la regla nueva
+        // explícita en el mismo instante en que la barra desaparece.
+        EfectosVisuales.Instancia?.Popup(posBoss + Vector2.up * 0.7f, "¡FUERA DE ALCANCE!", ColorSuperAdministradorNivel2, 2f);
 
         Telemetria.Registrar(tPelea, "super_administrador_nivel2_transformacion", nivelFever, comboOrbes, 0, orbesActivos);
     }
