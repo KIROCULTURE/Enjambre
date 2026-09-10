@@ -1,0 +1,47 @@
+PLACEHOLDER — reemplazar por arte final cuando se sume un artista.
+
+Origen: LuizMelo, "EVil Wizard 2", CC0.
+https://luizmelo.itch.io/evil-wizard-2
+Licencia: Creative Commons Zero (CC0) — "Can be used in commercial and
+non-commercial projects" (texto literal del License.txt del pack). Uso
+comercial libre, sin atribución obligatoria — igual se cita en Créditos
+por convención del proyecto (ver Assets/Editor/EstiloMinimal.cs,
+EstilarPanelCreditos).
+
+Reemplaza al placeholder anterior (Kenney "Toon Characters" / Robot):
+un robot de juguete genérico no se leía como una amenaza real ni encajaba
+con el tono de la pelea — un hechicero encapuchado con bastón sí, y
+además calza literal con el lenguaje que ya usa el juego ("lanzar
+hechizo") en vez de tener que forzar esa metáfora sobre un robot.
+
+Cada pose es un sprite sheet horizontal de 250x250px por frame (no una
+imagen suelta como el placeholder anterior) — CrearAdministradorSistema.cs
+las corta en sub-sprites vía TextureImporter.spritesheet antes de armar
+los AnimationClip, así que cada estado del Animator queda con la
+animación completa del pack, no un solo frame estático.
+
+  boss_idle.png     (8 frames) -> estado Animator "idle"
+  boss_ataque.png   (8 frames) -> estado Animator "lanzar_hechizo"
+  boss_golpe.png    (3 frames) -> estado Animator "retroceso"
+  boss_caida.png    (2 frames, se usa solo el frame 0) -> pose estática
+                                  durante el beat "desciende al área de
+                                  juego" (Animator apagado, ver
+                                  AdministradorSistema.Descender)
+
+Incluidos pero SIN USAR todavía (copiados ahora para no tener que volver
+a bajar el pack más adelante):
+  boss_ataque2.png (8 frames) -> variante de ataque, candidata para una
+                                  segunda familia de hechizo en un balance
+                                  pass futuro
+  boss_muerte.png  (7 frames) -> candidata para el beat de "recast" o
+                                  desaparición del punto 5 (cutscene de
+                                  cierre)
+  boss_correr.png  (8 frames), boss_salto.png (2 frames) -> reservados
+                                  por si el punto 4/6 suma movimiento con
+                                  pose propia en vez de solo deslizarse
+
+Para reemplazar por arte final: el AnimatorController real vive en
+Assets/Animations/AdministradorSistema.controller, con exactamente estos
+3 estados nombrados (idle, lanzar_hechizo, retroceso) — alcanza con
+reemplazar los AnimationClip de cada estado, sin tocar código. Ver
+Assets/Editor/CrearAdministradorSistema.cs para cómo se armó.

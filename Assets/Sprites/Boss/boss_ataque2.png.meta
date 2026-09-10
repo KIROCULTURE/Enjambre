@@ -1,0 +1,715 @@
+fileFormatVersion: 2
+guid: 5b54c9a47b75851458fdd50c99e06851
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6436619617153937450
+    second: boss_ataque2_0
+  - first:
+      213: 191955309049223524
+    second: boss_ataque2_1
+  - first:
+      213: -1494559834455244635
+    second: boss_ataque2_2
+  - first:
+      213: -5304744957268238749
+    second: boss_ataque2_3
+  - first:
+      213: -1921251366609269872
+    second: boss_ataque2_4
+  - first:
+      213: 7041485861258114568
+    second: boss_ataque2_5
+  - first:
+      213: 3675368405695561563
+    second: boss_ataque2_6
+  - first:
+      213: 8569413517726951203
+    second: boss_ataque2_7
+  - first:
+      213: -6494349844596040755
+    second: boss_ataque2_8
+  - first:
+      213: -2597478991603188095
+    second: boss_ataque2_9
+  - first:
+      213: -5043281717351385026
+    second: boss_ataque2_10
+  - first:
+      213: -7168479362017106720
+    second: boss_ataque2_11
+  - first:
+      213: 7253140247901699299
+    second: boss_ataque2_12
+  - first:
+      213: -8187390430103675950
+    second: boss_ataque2_13
+  - first:
+      213: -3968150710617039456
+    second: boss_ataque2_14
+  - first:
+      213: -8172911966964315865
+    second: boss_ataque2_15
+  - first:
+      213: 533551497718576647
+    second: boss_ataque2_16
+  - first:
+      213: 7842828003391114906
+    second: boss_ataque2_17
+  - first:
+      213: 351871428964717567
+    second: boss_ataque2_18
+  - first:
+      213: -4716237281194244629
+    second: boss_ataque2_19
+  - first:
+      213: -8915905261174521139
+    second: boss_ataque2_20
+  - first:
+      213: -4440022035091283006
+    second: boss_ataque2_21
+  - first:
+      213: -4295674989784249054
+    second: boss_ataque2_22
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: boss_ataque2_0
+      rect:
+        serializedVersion: 2
+        x: 1099
+        y: 205
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6df8a359f888ca6a0800000000000000
+      internalID: -6436619617153937450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_1
+      rect:
+        serializedVersion: 2
+        x: 1352
+        y: 210
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46911a82656f9a200800000000000000
+      internalID: 191955309049223524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_2
+      rect:
+        serializedVersion: 2
+        x: 1591
+        y: 190
+        width: 23
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a08ab3cfb1424be0800000000000000
+      internalID: -1494559834455244635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_3
+      rect:
+        serializedVersion: 2
+        x: 598
+        y: 189
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36e5bfd2192c166b0800000000000000
+      internalID: -5304744957268238749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_4
+      rect:
+        serializedVersion: 2
+        x: 849
+        y: 197
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09b4501bf085655e0800000000000000
+      internalID: -1921251366609269872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_5
+      rect:
+        serializedVersion: 2
+        x: 1090
+        y: 194
+        width: 10
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 806b93b551268b160800000000000000
+      internalID: 7041485861258114568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_6
+      rect:
+        serializedVersion: 2
+        x: 1108
+        y: 81
+        width: 136
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5f7d209718810330800000000000000
+      internalID: 3675368405695561563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_7
+      rect:
+        serializedVersion: 2
+        x: 1337
+        y: 179
+        width: 29
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 327ab81113cace670800000000000000
+      internalID: 8569413517726951203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_8
+      rect:
+        serializedVersion: 2
+        x: 1423
+        y: 75
+        width: 64
+        height: 133
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcb5db1993f6fd5a0800000000000000
+      internalID: -6494349844596040755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_9
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 82
+        width: 74
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18eb3f18e96e3fbd0800000000000000
+      internalID: -2597478991603188095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_10
+      rect:
+        serializedVersion: 2
+        x: 333
+        y: 82
+        width: 74
+        height: 109
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e387c0f9ff9a20ab0800000000000000
+      internalID: -5043281717351385026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_11
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 82
+        width: 77
+        height: 108
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e4604f1002748c90800000000000000
+      internalID: -7168479362017106720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_12
+      rect:
+        serializedVersion: 2
+        x: 837
+        y: 182
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ecf44e60a458a460800000000000000
+      internalID: 7253140247901699299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_13
+      rect:
+        serializedVersion: 2
+        x: 859
+        y: 187
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2dbdc3058cb806e80800000000000000
+      internalID: -8187390430103675950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_14
+      rect:
+        serializedVersion: 2
+        x: 1082
+        y: 173
+        width: 33
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ad157ee3fb4ee8c0800000000000000
+      internalID: -3968150710617039456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_15
+      rect:
+        serializedVersion: 2
+        x: 1385
+        y: 182
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7298d843edbf39e80800000000000000
+      internalID: -8172911966964315865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_16
+      rect:
+        serializedVersion: 2
+        x: 1399
+        y: 180
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 706b4e2a24e876700800000000000000
+      internalID: 533551497718576647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_17
+      rect:
+        serializedVersion: 2
+        x: 1646
+        y: 181
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9e0d98148257dc60800000000000000
+      internalID: 7842828003391114906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_18
+      rect:
+        serializedVersion: 2
+        x: 831
+        y: 82
+        width: 77
+        height: 102
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff31d0a433912e400800000000000000
+      internalID: 351871428964717567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_19
+      rect:
+        serializedVersion: 2
+        x: 1608
+        y: 69
+        width: 126
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be586f13e2f8c8eb0800000000000000
+      internalID: -4716237281194244629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_20
+      rect:
+        serializedVersion: 2
+        x: 1657
+        y: 177
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc208a84767544480800000000000000
+      internalID: -8915905261174521139
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_21
+      rect:
+        serializedVersion: 2
+        x: 1358
+        y: 81
+        width: 84
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c32a7bbb7fd162c0800000000000000
+      internalID: -4440022035091283006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ataque2_22
+      rect:
+        serializedVersion: 2
+        x: 1858
+        y: 81
+        width: 68
+        height: 89
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22d41633b52b264c0800000000000000
+      internalID: -4295674989784249054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      boss_ataque2_0: -6436619617153937450
+      boss_ataque2_1: 191955309049223524
+      boss_ataque2_10: -5043281717351385026
+      boss_ataque2_11: -7168479362017106720
+      boss_ataque2_12: 7253140247901699299
+      boss_ataque2_13: -8187390430103675950
+      boss_ataque2_14: -3968150710617039456
+      boss_ataque2_15: -8172911966964315865
+      boss_ataque2_16: 533551497718576647
+      boss_ataque2_17: 7842828003391114906
+      boss_ataque2_18: 351871428964717567
+      boss_ataque2_19: -4716237281194244629
+      boss_ataque2_2: -1494559834455244635
+      boss_ataque2_20: -8915905261174521139
+      boss_ataque2_21: -4440022035091283006
+      boss_ataque2_22: -4295674989784249054
+      boss_ataque2_3: -5304744957268238749
+      boss_ataque2_4: -1921251366609269872
+      boss_ataque2_5: 7041485861258114568
+      boss_ataque2_6: 3675368405695561563
+      boss_ataque2_7: 8569413517726951203
+      boss_ataque2_8: -6494349844596040755
+      boss_ataque2_9: -2597478991603188095
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

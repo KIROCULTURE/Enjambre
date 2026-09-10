@@ -1,0 +1,53 @@
+# Generado/temporal de Unity — regenerable, no versionar
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+[Uu]serSettings/
+[Uu]ser[Ss]ettings/
+
+# Assets del Asset Store (si algún día se usan)
+/[Aa]ssets/[Aa]ssetStoreTools*
+
+# Archivos de proyecto de IDE (regenerados por Unity/Rider/VS)
+.vs/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Autogenerado
+sysinfo.txt
+crashlytics-build.properties
+[Aa]ssets/[Ss]treamingAssets/aa.meta
+[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config local de Claude Code (permisos de esta máquina/sesión, no del proyecto)
+.claude/settings.local.json
+
+# Basura de desarrollo propia de este proyecto — logs/capturas de
+# depuración de las corridas en batch mode (no assets del juego) y
+# backups sueltos que no van a control de versiones por tamaño.
+/capturas/
+*.zip
+captura_laser_shader.txt
