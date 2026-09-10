@@ -37,6 +37,7 @@ public static class EjecutarSweepRegresion
         Correr("VerificarFase2PatronesPropios", VerificarFase2PatronesPropios.Verificar);
         Correr("VerificarSentenciaFinalNivel2", VerificarSentenciaFinalNivel2.Verificar);
         Correr("VerificarReentradaProyectilesNivel2", VerificarReentradaProyectilesNivel2.Verificar);
+        Correr("VerificarCutsceneCierreActualizada", VerificarCutsceneCierreActualizada.Verificar);
         Correr("VerificarColapsoAgonicoNivel2", VerificarColapsoAgonicoNivel2.Verificar);
         Correr("VerificarLimpiezaLaseresNivel2", VerificarLimpiezaLaseresNivel2.Verificar);
 

@@ -84,6 +84,8 @@ public class FormaPrecisa : MonoBehaviour
     SpriteRenderer srCuerpo;
     SpriteRenderer srHitbox;
     CircleCollider2D col;
+    /// <summary>Expuesto para la cutscene de cierre (revisión) — el shader de glitch sobre el jugador en el momento de la transformación final necesita tocar el material real, no solo el .color que ya expone ActualizarVisual.</summary>
+    public SpriteRenderer SpriteCuerpoRenderer => srCuerpo;
 
     void Awake()
     {

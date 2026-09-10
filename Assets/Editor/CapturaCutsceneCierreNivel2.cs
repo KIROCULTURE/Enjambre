@@ -74,6 +74,8 @@ public static class CapturaCutsceneCierreNivel2
         // Reposiciona al boss a su esquina — mismo destino final que
         // ReposicionarACorners, sin tickear el tween.
         if (boss != null) boss.transform.position = esquinaBoss;
+        var fp = (FormaPrecisa)campoFormaPrecisaActiva.GetValue(gm);
+        if (fp != null) fp.transform.position = esquinaJugador;
 
         // El láser final — CrearHazVisual (privado) ya deja el sprite en
         // su estado de brillo pleno, sin telegraph que tickear.
@@ -82,14 +84,29 @@ public static class CapturaCutsceneCierreNivel2
         metodoHaz.Invoke(gm, new object[] { new Rect(esquinaJugador.x - grosor * 0.5f, -gm.mitadAlto * 1.3f, grosor, gm.mitadAlto * 2.6f), ColorFinalNivel3(gm), 5f });
         metodoHaz.Invoke(gm, new object[] { new Rect(-gm.mitadAncho * 1.3f, esquinaJugador.y - grosor * 0.5f, gm.mitadAncho * 2.6f, grosor), ColorFinalNivel3(gm), 5f });
 
+        // Revisión: tinte de color sobre el jugador justo antes del
+        // impacto — "un rayo vistoso brillante que lo transforma" (el
+        // primer intento, el shader de glitch del punto 9, dejaba al
+        // jugador invisible con este sprite procedural — ver el
+        // comentario de AplicarGlitchTransformacionFinalNivel2). Captura
+        // este beat SEPARADO (antes de destruir la Forma Precisa en
+        // AsegurarFormaNivel3 más abajo, que la reemplaza por el
+        // placeholder de Nivel 3 — este beat no se vería en una foto
+        // tomada después de eso).
+        typeof(GameManager).GetMethod("AplicarGlitchTransformacionFinalNivel2", Flags).Invoke(gm, null);
+        if (gm.panelMenu != null) gm.panelMenu.SetActive(false);
+        if (gm.panelCutsceneNivel2 != null) gm.panelCutsceneNivel2.SetActive(false);
+        GuardarCaptura(cam, "cutscene_nivel2_cierre_glitch.png");
+
         // La transformación en sí — destruye la Forma Precisa y deja el
         // placeholder de Nivel 3 en la esquina del jugador.
         var metodoAsegurar = typeof(GameManager).GetMethod("AsegurarFormaNivel3", Flags);
         metodoAsegurar.Invoke(gm, new object[] { esquinaJugador });
+        GuardarCaptura(cam, "cutscene_nivel2_cierre.png");
+    }
 
-        if (gm.panelMenu != null) gm.panelMenu.SetActive(false);
-        if (gm.panelCutsceneNivel2 != null) gm.panelCutsceneNivel2.SetActive(false);
-
+    static void GuardarCaptura(Camera cam, string archivo)
+    {
         int w = 960, h = 540;
         var rt = new RenderTexture(w, h, 24);
         var prevRT = cam.targetTexture;
@@ -106,7 +123,7 @@ public static class CapturaCutsceneCierreNivel2
 
         var dir = Path.Combine(Application.dataPath, "..", "..", "capturas");
         Directory.CreateDirectory(dir);
-        var ruta = Path.Combine(dir, "cutscene_nivel2_cierre.png");
+        var ruta = Path.Combine(dir, archivo);
         File.WriteAllBytes(ruta, tex.EncodeToPNG());
         Object.DestroyImmediate(tex);
         Debug.Log("CapturaCutsceneCierreNivel2: captura guardada en " + ruta);

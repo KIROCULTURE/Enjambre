@@ -2525,39 +2525,80 @@ public class GameManager : MonoBehaviour
         Vector2 esquinaBoss = new Vector2(-mitadAncho * 0.75f, mitadAlto * 0.75f);
         Vector2 esquinaJugador = new Vector2(mitadAncho * 0.75f, -mitadAlto * 0.75f);
 
-        // a. Vuelve a lanzar el hechizo — el mismo gesto que en la
-        // apertura, pero ahora es el segundo intento: desesperado, no la
-        // curiosidad de la primera vez (pedido explícito).
+        // a. Vuelve a lanzar el hechizo — mismo gesto que la apertura y el
+        // cierre viejo, pero el TONO cambia a propósito (pedido vía
+        // revisión): esto pasa DESPUÉS de la transformación a Super
+        // Administrador — ya no es el Administrador desesperado de la
+        // Fase 1 ("¡no te dejaré corromper el sistema!", un pedido/amenaza
+        // que podía fallar); ahora habla desde el control total, sin duda
+        // de que va a funcionar. Mismo registro que la terminal de
+        // escalada (sudo/root), no un grito.
         administradorActivo?.LanzarHechizo();
         BeepSynth.Instancia?.Beep(90f, 0.6f, BeepSynth.Onda.Sierra, 0.3f);
-        yield return MostrarDialogo("¡NO TE DEJARÉ CORROMPER EL SISTEMA!", 1.7f);
+        yield return MostrarDialogo("Con privilegios root, esto no va a fallar.", 1.9f);
         yield return new WaitForSeconds(0.2f);
 
-        // b. Campo de fuerza: reposiciona a los dos a esquinas opuestas —
-        // tiene que sentirse deliberado y pesado, no un teletransporte
-        // instantáneo (pedido explícito).
+        // b. Campo de fuerza: te atrapa y reposiciona a los dos a esquinas
+        // opuestas — tiene que sentirse deliberado y pesado, no un
+        // teletransporte instantáneo (pedido explícito). El aura de
+        // contención en el jugador (nueva, pedido vía revisión: "encierra
+        // al player en un campo de fuerza") deja claro que es él quien
+        // queda atrapado, no un efecto ambiental sin blanco.
         EfectosVisuales.Instancia?.Onda(Vector2.zero, ColorFinalNivel3, 2f);
         CameraPunch.Instancia?.Golpear();
         BeepSynth.Instancia?.Beep(60f, 0.5f, BeepSynth.Onda.Cuadrada, 0.3f);
+        if (formaPrecisaActiva != null) EfectosVisuales.Instancia?.Onda(formaPrecisaActiva.transform.position, ColorFinalNivel3, 1.2f);
         yield return ReposicionarACorners(esquinaBoss, esquinaJugador, 1.1f);
         yield return new WaitForSeconds(0.3f);
 
         // c. El láser final: un color nunca antes usado en el juego,
         // escalada más grande que la transformación de apertura (pedido
-        // explícito).
+        // explícito). El shader de glitch (punto 9) sobre la Forma Precisa
+        // justo antes del impacto — pedido vía revisión: "un rayo vistoso
+        // brillante que lo transforma en una nueva figura morfológica",
+        // la corrupción visual real del proceso de transformación, no solo
+        // partículas genéricas.
+        AplicarGlitchTransformacionFinalNivel2();
         yield return DispararLaserFinal(esquinaBoss, esquinaJugador, ColorFinalNivel3);
 
         // d. Impacta y transforma — el beat más importante de este cierre.
         AsegurarFormaNivel3(esquinaJugador);
         yield return new WaitForSeconds(0.5f);
 
-        // e. Reacción final del boss — el mismo fracaso de siempre, otra
-        // vez (eco deliberado del "¡¿?!" de la apertura).
+        // e. Reacción final del boss — pedido vía revisión: ya no es el
+        // "¡¿otra vez...?!" desesperado de antes (esa línea sonaba a que
+        // dudaba de haber ganado); ahora responde desde el control, sin
+        // pánico — un resultado más que un susto. El juego sigue siendo
+        // honesto sobre que es un cierre parcial (Nivel 3 pendiente, ver
+        // TerminarPeleaNivel2), pero la REACCIÓN del boss ya no lo es.
         administradorActivo?.Retroceder();
         BeepSynth.Instancia?.Beep(140f, 0.3f, BeepSynth.Onda.Seno, 0.2f);
-        yield return MostrarDialogo("¡¿OTRA VEZ...?!", 1.2f);
+        yield return MostrarDialogo("Proceso finalizado. Amenaza contenida.", 1.6f);
 
         TerminarCutsceneCierre();
+    }
+
+    /// <summary>
+    /// Pedido vía revisión: "un rayo vistoso brillante que lo transforma
+    /// en una nueva figura morfológica". Primer intento: reusar el shader
+    /// de glitch del punto 9 (materialCorrupcionGlitchNivel2) — funciona
+    /// bien en el Administrador (textura importada de verdad) pero deja al
+    /// jugador COMPLETAMENTE INVISIBLE con el sprite procedural de
+    /// FormaPrecisa (confirmado con capturas, incluso a intensidad muy
+    /// baja — no es un tema de magnitud del desplazamiento, algo más
+    /// estructural en cómo el shader samplea una textura generada en
+    /// runtime vs. una importada). Sin poder depurar HLSL interactivamente
+    /// en batch mode, un sprite invisible es peor que no tener el efecto
+    /// — se cae a un flash de color HDR + partículas, mismo lenguaje ya
+    /// probado en el resto del proyecto, hasta poder diagnosticar el
+    /// shader con el usuario mirando el resultado real.
+    /// </summary>
+    void AplicarGlitchTransformacionFinalNivel2()
+    {
+        if (formaPrecisaActiva == null || formaPrecisaActiva.SpriteCuerpoRenderer == null) return;
+        EfectosVisuales.Instancia?.Chispas(formaPrecisaActiva.transform.position, ColorFinalNivel3, 22, 4f);
+        var srJugador = formaPrecisaActiva.SpriteCuerpoRenderer;
+        srJugador.color = ColorFinalNivel3;
     }
 
     IEnumerator ReposicionarACorners(Vector2 posBoss, Vector2 posJugador, float duracion)
