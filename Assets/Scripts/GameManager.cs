@@ -1852,6 +1852,7 @@ public class GameManager : MonoBehaviour
         if (administradorActivo != null && administradorActivo.sr != null && materialCorrupcionGlitchNivel2 != null)
             StartCoroutine(AnimarGlitchTransformacionNivel2(administradorActivo.sr));
 
+        bool sentenciaFinalDisparada = false;
         while (PeleaActiva && tPelea < duracionPeleaNivel2)
         {
             bool climax = FaseEnTiempo(tPelea) == 5;
@@ -1861,11 +1862,72 @@ public class GameManager : MonoBehaviour
             // pedido vía revisión: el tramo 112-128s es justo el que el
             // usuario marcó como "riesgo de sentirse pesado").
             enSuperAdministradorClimaxNivel2 = climax;
+
+            // Sentencia Final (pedido explícito: "esa segunda fase tiene
+            // que ser la parte más 'si pierdo ahora, tengo que pasar de
+            // nuevo por la fase 1'") — UN solo momento escenificado, no
+            // aleatorio, justo al entrar al clímax (112s). El resto del
+            // clímax sigue con la selección aleatoria normal (que ya
+            // favorece los patrones propios) una vez que termina.
+            if (climax && !sentenciaFinalDisparada)
+            {
+                sentenciaFinalDisparada = true;
+                Telemetria.Registrar(tPelea, "sentencia_final_nivel2_inicio", nivelFever, comboOrbes, 0, orbesActivos);
+                yield return StartCoroutine(PatronSentenciaFinalNivel2());
+                continue;
+            }
+
             string patron = DispararPatronLaserFase2(climax);
             Telemetria.Registrar(tPelea, "pelea_patron_fase2", nivelFever, comboOrbes, 0, orbesActivos, $"climax={climax};patron={patron}");
             yield return new WaitForSeconds(EsperaClampeadaFase2Nivel2(climax));
         }
         if (PeleaActiva) PeleaNivel2Victoria();
+    }
+
+    // "Sentencia Final" — pedido vía revisión (feedback jugando): la Fase
+    // 2 tenía identidad (los rayos salen del boss) pero no forzaba
+    // reposicionarse de verdad ni se sentía como el momento más tenso de
+    // la pelea. Este patrón dispara UNA vez, justo al entrar al clímax
+    // (112s) — más grande que cualquier otro patrón del nivel, en dos
+    // beats con un respiro dramático entre medio. Reusa
+    // CrearRayoConOjoSeguroNivel2 sin cambios (la garantía de justicia ya
+    // está probada y es independiente de CUÁNTOS rayos se disparen) —
+    // simplemente hay más. Generación de cada beat separada de la
+    // corrutina en su propio método síncrono para poder probarlas
+    // directo sin tickear yields (mismo límite de siempre en batch mode).
+    [Header("Nivel 2 — Sentencia Final, patrón único del clímax (112-128s, números de primer pase)")]
+    public int rayosSentenciaFinalNivel2 = 16;
+    public int brazosSentenciaFinalNivel2 = 7;
+    public int oleadasSentenciaFinalNivel2 = 10;
+    public float pasoAnguloSentenciaFinalNivel2 = 8f;
+    public float esperaEntreOleadasSentenciaFinalNivel2 = 0.08f;
+
+    IEnumerator PatronSentenciaFinalNivel2()
+    {
+        Vector2 origen = PosicionOrigenBoss();
+
+        // Beat 0: carga dramática — puro aviso, todavía nada peligroso.
+        administradorActivo?.LanzarHechizo();
+        EfectosVisuales.Instancia?.Onda(origen, ColorSuperAdministradorNivel2, 3f);
+        EfectosVisuales.Instancia?.Popup(origen + Vector2.up * 0.8f, "¡SENTENCIA FINAL!", ColorSuperAdministradorNivel2, 2f);
+        CameraPunch.Instancia?.Golpear();
+        BeepSynth.Instancia?.Beep(45f, 0.8f, BeepSynth.Onda.Sierra, 0.35f);
+        yield return new WaitForSeconds(0.8f);
+
+        // Beat 1: Tela Radial con el doble de rayos que el patrón normal —
+        // reusa DispararTelaRadialNivel2 tal cual (la garantía del ojo
+        // seguro es independiente de cuántos rayos se disparen).
+        DispararTelaRadialNivel2(rayosSentenciaFinalNivel2);
+        yield return new WaitForSeconds(duracionActivoShowLaser + 0.5f); // deja que se resuelva del todo y da un respiro antes del segundo beat
+
+        // Beat 2: Espiral Giratoria amplificada — reusa la MISMA corrutina
+        // del patrón normal (con más brazos/oleadas, más rápida) en vez de
+        // una copia sin escalonar: dispararla toda de una en el mismo
+        // frame perdía el giro en el tiempo que la hace navegable, y con
+        // ~140 rects a la vez era demasiado denso incluso con el ojo
+        // seguro (encontrado antes de shippearlo, no jugando).
+        yield return StartCoroutine(SecuenciaEspiralGiratoriaFase2(
+            brazosSentenciaFinalNivel2, oleadasSentenciaFinalNivel2, pasoAnguloSentenciaFinalNivel2, esperaEntreOleadasSentenciaFinalNivel2));
     }
 
     /// <summary>true durante el tramo 112-128s (clímax de la canción) mientras dura la Fase 2 — ver el comentario de FaseLaseresYVictoriaNivel2. Solo para etiquetar telemetría (ResolverImpactoLaser); no cambia ninguna lógica de juego.</summary>
@@ -1930,7 +1992,10 @@ public class GameManager : MonoBehaviour
     // radio) en vez de un rect que pasa por el centro.
     public float radioSeguroCercaDelBossNivel2 = 1.3f;
 
-    void PatronTelaRadialFase2()
+    void PatronTelaRadialFase2() => DispararTelaRadialNivel2(rayosTelaRadialNivel2);
+
+    /// <summary>Cantidad de rayos parametrizable — reusada tal cual por Sentencia Final (más rayos, misma garantía de ojo seguro, sin duplicar la lógica).</summary>
+    void DispararTelaRadialNivel2(int cantidadRayos)
     {
         administradorActivo?.LanzarHechizo();
         Vector2 origen = PosicionOrigenBoss();
@@ -1938,10 +2003,10 @@ public class GameManager : MonoBehaviour
         BeepSynth.Instancia?.Beep(130f, 0.35f, BeepSynth.Onda.Sierra, 0.24f);
 
         float largo = Mathf.Max(mitadAncho, mitadAlto) * 2.6f;
-        float offset = Random.Range(0f, 180f / rayosTelaRadialNivel2);
-        for (int i = 0; i < rayosTelaRadialNivel2; i++)
+        float offset = Random.Range(0f, 180f / cantidadRayos);
+        for (int i = 0; i < cantidadRayos; i++)
         {
-            float angulo = offset + i * (180f / rayosTelaRadialNivel2);
+            float angulo = offset + i * (180f / cantidadRayos);
             CrearRayoConOjoSeguroNivel2(origen, angulo, largo);
         }
     }
@@ -1971,9 +2036,11 @@ public class GameManager : MonoBehaviour
     // (Configurar la fija de una), así que el giro sale de escalonar los
     // disparos en el tiempo, mismo truco que SecuenciaAbanico (Fase 1)
     // con el barrido de 3 rayos paralelos.
-    void PatronEspiralGiratoriaFase2() => StartCoroutine(SecuenciaEspiralGiratoriaFase2());
+    void PatronEspiralGiratoriaFase2() => StartCoroutine(SecuenciaEspiralGiratoriaFase2(
+        brazosEspiralGiratoriaNivel2, oleadasEspiralGiratoriaNivel2, pasoAnguloEspiralGiratoriaNivel2, esperaEntreOleadasEspiralGiratoriaNivel2));
 
-    IEnumerator SecuenciaEspiralGiratoriaFase2()
+    /// <summary>Parametrizable — reusada tal cual por Sentencia Final (más brazos/oleadas, más rápida, mismo giro escalonado en el tiempo, sin duplicar la lógica).</summary>
+    IEnumerator SecuenciaEspiralGiratoriaFase2(int brazos, int oleadas, float pasoAngulo, float esperaEntreOleadas)
     {
         administradorActivo?.LanzarHechizo();
         Vector2 origen = PosicionOrigenBoss();
@@ -1982,14 +2049,14 @@ public class GameManager : MonoBehaviour
 
         float largo = Mathf.Max(mitadAncho, mitadAlto) * 2.6f;
         float anguloBase = Random.Range(0f, 360f);
-        for (int ola = 0; ola < oleadasEspiralGiratoriaNivel2; ola++)
+        for (int ola = 0; ola < oleadas; ola++)
         {
-            for (int b = 0; b < brazosEspiralGiratoriaNivel2; b++)
+            for (int b = 0; b < brazos; b++)
             {
-                float angulo = anguloBase + ola * pasoAnguloEspiralGiratoriaNivel2 + b * (360f / brazosEspiralGiratoriaNivel2);
+                float angulo = anguloBase + ola * pasoAngulo + b * (360f / brazos);
                 CrearRayoConOjoSeguroNivel2(origen, angulo, largo);
             }
-            yield return new WaitForSeconds(esperaEntreOleadasEspiralGiratoriaNivel2);
+            yield return new WaitForSeconds(esperaEntreOleadas);
         }
     }
 
