@@ -27,6 +27,7 @@ public static class VerificarFase2PatronesPropios
         PruebaTelaRadialDisparaDesdeElBoss();
         PruebaEspiralGiratoriaDisparaLaPrimeraOleada();
         PruebaClimaxFavoreceLosPatronesPropios();
+        PruebaOjoSeguroCercaDelBossNoTieneRayos();
 
         Debug.Log("Verificación de los patrones propios de la Fase 2 completa.");
     }
@@ -110,13 +111,20 @@ public static class VerificarFase2PatronesPropios
 
         typeof(GameManager).GetMethod("PatronTelaRadialFase2", Flags).Invoke(gm, null);
 
+        // Desde el fix del ojo seguro (ver PruebaOjoSeguroCercaDelBossNoTieneRayos):
+        // cada rayo son 2 LaserHazard (uno a cada lado del boss), NINGUNO
+        // centrado exactamente en el origen — todos arrancan a
+        // radioSeguroCercaDelBossNivel2 de distancia. "Centrados en el
+        // boss" ahora se prueba como "equidistantes del boss y nunca más
+        // cerca que el margen seguro", no como "en el punto exacto".
         var muros = Object.FindObjectsByType<LaserHazard>(FindObjectsSortMode.None);
-        bool todosEnElOrigen = muros.All(m => Vector2.Distance(m.transform.position, origenEsperado) < 0.01f);
-        Debug.Log($"PatronTelaRadialFase2(): LaserHazard creados={muros.Length} (esperado {gm.rayosTelaRadialNivel2}), todos centrados en el boss={todosEnElOrigen} (esperado true — es lo que le da 'identidad', a diferencia de los 4 heredados que se centran en el jugador)");
-        if (muros.Length != gm.rayosTelaRadialNivel2 || !todosEnElOrigen)
-            Debug.LogError("FALLÓ: Tela Radial debería crear exactamente rayosTelaRadialNivel2 paredes, todas centradas en la posición del boss.");
+        bool ningunoDemasiadoCerca = muros.All(m => Vector2.Distance(m.transform.position, origenEsperado) >= gm.radioSeguroCercaDelBossNivel2 - 0.01f);
+        int esperados = gm.rayosTelaRadialNivel2 * 2;
+        Debug.Log($"PatronTelaRadialFase2(): LaserHazard creados={muros.Length} (esperado {esperados} — 2 por rayo, uno a cada lado del ojo seguro), ninguno más cerca que el margen seguro={ningunoDemasiadoCerca} (esperado true)");
+        if (muros.Length != esperados || !ningunoDemasiadoCerca)
+            Debug.LogError("FALLÓ: Tela Radial debería crear exactamente 2*rayosTelaRadialNivel2 paredes, ninguna más cerca del boss que radioSeguroCercaDelBossNivel2.");
         else
-            Debug.Log("OK: Tela Radial dispara la cantidad de rayos configurada, todos desde el boss.");
+            Debug.Log("OK: Tela Radial dispara la cantidad de rayos configurada, todos desde el boss, respetando el ojo seguro.");
     }
 
     static void PruebaEspiralGiratoriaDisparaLaPrimeraOleada()
@@ -130,8 +138,9 @@ public static class VerificarFase2PatronesPropios
         typeof(GameManager).GetMethod("PatronEspiralGiratoriaFase2", Flags).Invoke(gm, null);
 
         int muros = Object.FindObjectsByType<LaserHazard>(FindObjectsSortMode.None).Length;
-        Debug.Log($"PatronEspiralGiratoriaFase2(), primera oleada síncrona: LaserHazard creados={muros} (esperado {gm.brazosEspiralGiratoriaNivel2}, un brazo por rayo de la primera tanda)");
-        if (muros != gm.brazosEspiralGiratoriaNivel2)
+        int esperados = gm.brazosEspiralGiratoriaNivel2 * 2; // 2 por brazo desde el fix del ojo seguro, ver PruebaOjoSeguroCercaDelBossNoTieneRayos
+        Debug.Log($"PatronEspiralGiratoriaFase2(), primera oleada síncrona: LaserHazard creados={muros} (esperado {esperados} — 2 por brazo de la primera tanda)");
+        if (muros != esperados)
             Debug.LogError("FALLÓ: la primera oleada de Espiral Giratoria debería crear exactamente brazosEspiralGiratoriaNivel2 paredes antes de esperar a la siguiente.");
         else
             Debug.Log("OK: Espiral Giratoria dispara su primera oleada completa de inmediato — el giro entre oleadas sale de escalonar el disparo en el tiempo, no de rotar una pared ya viva.");
@@ -165,6 +174,73 @@ public static class VerificarFase2PatronesPropios
             if (propios.Contains(nombre)) cuenta++;
         }
         return cuenta;
+    }
+
+    /// <summary>
+    /// Bug real jugado (2026-09-10): Tela Radial/Espiral Giratoria pasaban
+    /// TODOS sus rayos por el mismo punto (el boss) — el hueco angular
+    /// entre rayos consecutivos se angosta con la distancia y desaparece
+    /// del todo muy cerca del centro, sin importar los reflejos del
+    /// jugador. CrearRayoConOjoSeguroNivel2 parte cada rayo en dos mitades
+    /// que arrancan a radioSeguroCercaDelBossNivel2 del origen — este test
+    /// confirma con vidas reales (no matemática interna) que un punto dentro
+    /// de ese radio queda a salvo y uno más allá, alineado con el rayo, sí
+    /// se golpea.
+    /// </summary>
+    /// <summary>
+    /// LaserHazard telegrafea antes de resolver su impacto (Secuencia(),
+    /// detrás de un yield real) — no tickeable en batch mode más allá del
+    /// primer yield, mismo límite de siempre. Para probar el daño real sin
+    /// tickear la corrutina, se lee la geometría (centroRotado/tamanoRotado/
+    /// anguloGrados, privados) de cada LaserHazard que el patrón creó y se
+    /// resuelve a mano contra GameManager.ResolverImpactoLaserRotado —
+    /// mismo criterio que PruebaRotadoAAnguloCeroEquivaleARect, que ya
+    /// resuelve directo en vez de pasar por un LaserHazard real.
+    /// </summary>
+    static void ResolverTodosLosMurosDePrueba(GameManager gm)
+    {
+        var fCentro = typeof(LaserHazard).GetField("centroRotado", Flags);
+        var fTamano = typeof(LaserHazard).GetField("tamanoRotado", Flags);
+        var fAngulo = typeof(LaserHazard).GetField("anguloGrados", Flags);
+        var mResolver = typeof(GameManager).GetMethod("ResolverImpactoLaserRotado", Flags);
+        foreach (var muro in Object.FindObjectsByType<LaserHazard>(FindObjectsSortMode.None))
+        {
+            var centro = (Vector2)fCentro.GetValue(muro);
+            var tamano = (Vector2)fTamano.GetValue(muro);
+            var angulo = (float)fAngulo.GetValue(muro);
+            mResolver.Invoke(gm, new object[] { centro, tamano, angulo });
+        }
+    }
+
+    static void PruebaOjoSeguroCercaDelBossNoTieneRayos()
+    {
+        var gm = AbrirEscenaFresca();
+        Vector2 origen = new Vector3(0f, gm.mitadAlto * 0.6f, 0f); // misma posición que AbrirEscenaFresca instancia al boss
+        float largo = Mathf.Max(gm.mitadAncho, gm.mitadAlto) * 2.6f;
+        var metodo = typeof(GameManager).GetMethod("CrearRayoConOjoSeguroNivel2", Flags);
+
+        var fpEnElOrigen = CrearFormaEn(gm, origen); // el punto MÁS peligroso del diseño viejo — ahora tiene que ser el más seguro
+        int vidasAntesOrigen = Vidas(fpEnElOrigen);
+        metodo.Invoke(gm, new object[] { origen, 0f, largo }); // ángulo 0 -> dirección (0,1)
+        ResolverTodosLosMurosDePrueba(gm);
+        int vidasDespuesOrigen = Vidas(fpEnElOrigen);
+
+        var gm2 = AbrirEscenaFresca();
+        Vector2 origen2 = new Vector3(0f, gm2.mitadAlto * 0.6f, 0f);
+        Vector2 puntoLejano = origen2 + new Vector2(0f, largo * 0.5f - 0.5f); // bien adentro del segmento activo, lejos del margen seguro
+        var fpLejos = CrearFormaEn(gm2, puntoLejano);
+        int vidasAntesLejos = Vidas(fpLejos);
+        metodo.Invoke(gm2, new object[] { origen2, 0f, largo });
+        ResolverTodosLosMurosDePrueba(gm2);
+        int vidasDespuesLejos = Vidas(fpLejos);
+
+        Debug.Log($"Ojo seguro: en el origen del boss, vidas antes={vidasAntesOrigen}, después={vidasDespuesOrigen} (esperado SIN cambios — a salvo). Lejos, alineado con el rayo: vidas antes={vidasAntesLejos}, después={vidasDespuesLejos} (esperado UNA menos — el rayo sigue golpeando fuera del margen)");
+        if (vidasDespuesOrigen != vidasAntesOrigen)
+            Debug.LogError("FALLÓ: un punto en el origen del boss (el peor caso del diseño viejo) debería quedar a salvo del rayo — el margen de seguridad no está funcionando.");
+        else if (vidasDespuesLejos != vidasAntesLejos - 1)
+            Debug.LogError("FALLÓ: fuera del margen de seguridad, el rayo debería seguir golpeando normalmente — si no, el patrón perdió su dificultad real, no solo el punto ciego.");
+        else
+            Debug.Log("OK: el círculo alrededor del boss queda sin rayos (a salvo por diseño), y el rayo sigue siendo real más allá de ese margen.");
     }
 
     static void Invocar(object obj, string metodo) =>

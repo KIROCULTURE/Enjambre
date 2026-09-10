@@ -1918,6 +1918,17 @@ public class GameManager : MonoBehaviour
     // a propósito: es el patrón "de identidad" del clímax, tiene que
     // sentirse más difícil que los 4 heredados.
     public float radioTelaRadialReferenciaNivel2 = 3f;
+    // Bug real jugado (2026-09-10, corrida real): TODOS los rayos de Tela
+    // Radial/Espiral Giratoria pasan por el mismo punto (el boss) — el
+    // hueco angular entre rayos consecutivos se angosta con la distancia
+    // y en el límite (muy cerca del boss) desaparece del todo, sin importar
+    // el ancho configurado. El cálculo de "hueco navegable" de arriba solo
+    // vale a radioTelaRadialReferenciaNivel2 — más cerca del boss, una
+    // posición podía ser letal por geometría, no por reflejos. Se resuelve
+    // dejando un radio sin rayos alrededor del boss (cada rayo se parte en
+    // dos mitades, una a cada lado, ninguna entra al círculo de este
+    // radio) en vez de un rect que pasa por el centro.
+    public float radioSeguroCercaDelBossNivel2 = 1.3f;
 
     void PatronTelaRadialFase2()
     {
@@ -1931,8 +1942,26 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < rayosTelaRadialNivel2; i++)
         {
             float angulo = offset + i * (180f / rayosTelaRadialNivel2);
-            CrearMuroLaserRotado(origen, new Vector2(anchoRayoTelaRadialNivel2, largo), angulo, ColorLaserFase2, telegraphShowLaser, duracionActivoShowLaser);
+            CrearRayoConOjoSeguroNivel2(origen, angulo, largo);
         }
+    }
+
+    /// <summary>
+    /// Un rayo "completo" (cubre las dos direcciones opuestas desde
+    /// origen, como antes) pero partido en dos mitades que arrancan a
+    /// radioSeguroCercaDelBossNivel2 del centro en vez de una sola pared
+    /// que pasa por el origen — deja un círculo de verdad sin rayos
+    /// alrededor del boss. Ver el comentario de radioSeguroCercaDelBossNivel2.
+    /// </summary>
+    void CrearRayoConOjoSeguroNivel2(Vector2 origen, float anguloGrados, float largoTotal)
+    {
+        Vector2 dir = Quaternion.Euler(0f, 0f, anguloGrados) * Vector2.up;
+        float mitadLargo = largoTotal * 0.5f;
+        float segmento = mitadLargo - radioSeguroCercaDelBossNivel2;
+        if (segmento <= 0.1f) { CrearMuroLaserRotado(origen, new Vector2(anchoRayoTelaRadialNivel2, largoTotal), anguloGrados, ColorLaserFase2, telegraphShowLaser, duracionActivoShowLaser); return; } // resguardo: si algún día el margen configurado supera al largo, no desaparece el patrón entero
+        float centroDesdeOrigen = radioSeguroCercaDelBossNivel2 + segmento * 0.5f;
+        CrearMuroLaserRotado(origen + dir * centroDesdeOrigen, new Vector2(anchoRayoTelaRadialNivel2, segmento), anguloGrados, ColorLaserFase2, telegraphShowLaser, duracionActivoShowLaser);
+        CrearMuroLaserRotado(origen - dir * centroDesdeOrigen, new Vector2(anchoRayoTelaRadialNivel2, segmento), anguloGrados, ColorLaserFase2, telegraphShowLaser, duracionActivoShowLaser);
     }
 
     // Patrón propio — Espiral Giratoria: el mismo abanico de Tela Radial
@@ -1958,7 +1987,7 @@ public class GameManager : MonoBehaviour
             for (int b = 0; b < brazosEspiralGiratoriaNivel2; b++)
             {
                 float angulo = anguloBase + ola * pasoAnguloEspiralGiratoriaNivel2 + b * (360f / brazosEspiralGiratoriaNivel2);
-                CrearMuroLaserRotado(origen, new Vector2(anchoRayoTelaRadialNivel2, largo), angulo, ColorLaserFase2, telegraphShowLaser, duracionActivoShowLaser);
+                CrearRayoConOjoSeguroNivel2(origen, angulo, largo);
             }
             yield return new WaitForSeconds(esperaEntreOleadasEspiralGiratoriaNivel2);
         }
