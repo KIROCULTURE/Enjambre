@@ -1,1 +1,1 @@
-Hola, esto es esclavizando a un tal Claudio gIAn Carlos
+Hola, esto es esclavizando a un tal Claudio gladOS
