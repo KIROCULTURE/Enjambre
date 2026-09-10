@@ -28,6 +28,7 @@ public static class VerificarFase2PatronesPropios
         PruebaEspiralGiratoriaDisparaLaPrimeraOleada();
         PruebaClimaxFavoreceLosPatronesPropios();
         PruebaOjoSeguroCercaDelBossNoTieneRayos();
+        PruebaNodosItinerantesQuedanDentroDelAreaYDispersos();
 
         Debug.Log("Verificación de los patrones propios de la Fase 2 completa.");
     }
@@ -254,6 +255,29 @@ public static class VerificarFase2PatronesPropios
             Debug.LogError("FALLÓ: fuera del margen de seguridad, el rayo debería seguir golpeando normalmente — si no, el patrón perdió su dificultad real, no solo el punto ciego.");
         else
             Debug.Log("OK: el círculo alrededor del boss queda sin rayos (a salvo por diseño), y el rayo sigue siendo real más allá de ese margen.");
+    }
+
+    /// <summary>Pedido vía revisión ("más variaciones en el mapa para que el jugador no se quede en una esquina"): los nodos tienen que quedar SIEMPRE visibles (dentro del área que la cámara muestra) y de verdad distribuidos, no amontonados.</summary>
+    static void PruebaNodosItinerantesQuedanDentroDelAreaYDispersos()
+    {
+        var gm = AbrirEscenaFresca();
+
+        typeof(GameManager).GetMethod("PatronNodosItinerantesFase2", Flags).Invoke(gm, null);
+
+        var muros = Object.FindObjectsByType<LaserHazard>(FindObjectsSortMode.None);
+        bool todosDentroDelArea = muros.All(m =>
+            Mathf.Abs(m.transform.position.x) <= gm.mitadAncho * gm.factorRadioNodosItinerantesNivel2 + 0.01f &&
+            Mathf.Abs(m.transform.position.y) <= gm.mitadAlto * gm.factorRadioNodosItinerantesNivel2 + 0.01f);
+        // Dispersión real: con 3 nodos separados ~120° (± jitter de 15°),
+        // el más cercano a cualquier otro nunca debería estar a menos de
+        // ~90° — lejos de "todos amontonados en el mismo punto".
+        bool algunoLejosDeLosDemas = muros.Length >= 2 &&
+            Vector2.Distance(muros[0].transform.position, muros[1].transform.position) > 0.5f;
+        Debug.Log($"PatronNodosItinerantesFase2(): LaserHazard creados={muros.Length} (esperado {gm.nodosItinerantesNivel2}), todos dentro del área visible={todosDentroDelArea} (esperado true), dispersos (no amontonados)={algunoLejosDeLosDemas} (esperado true)");
+        if (muros.Length != gm.nodosItinerantesNivel2 || !todosDentroDelArea || !algunoLejosDeLosDemas)
+            Debug.LogError("FALLÓ: los nodos itinerantes deberían quedar siempre dentro del área visible y de verdad distribuidos, no amontonados en un punto.");
+        else
+            Debug.Log("OK: los nodos itinerantes aparecen distribuidos y siempre dentro de lo que la cámara muestra — el jugador tiene que mirar varios puntos de la pantalla, no solo al boss.");
     }
 
     static void Invocar(object obj, string metodo) =>

@@ -43,6 +43,7 @@ public static class CapturaFase2LaseresNivel2
         });
         CapturarConPatrones(gm, cam, "fase2_tela_radial_nivel2.png", () => Invocar(gm, "PatronTelaRadialFase2"));
         CapturarConPatrones(gm, cam, "fase2_espiral_giratoria_nivel2.png", () => Invocar(gm, "PatronEspiralGiratoriaFase2"));
+        CapturarConPatrones(gm, cam, "fase2_nodos_itinerantes_nivel2.png", () => Invocar(gm, "PatronNodosItinerantesFase2"));
     }
 
     static (GameManager, Camera) PrepararEscenaFase2()

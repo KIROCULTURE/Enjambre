@@ -19,7 +19,7 @@ public static class VerificarTelemetriaPatronesNivel2
     static readonly BindingFlags Flags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
 
     static readonly string[] NombresFase1Validos = { "barrido_simple", "cruz", "corredor", "abanico", "anillo_expansivo", "disparo_dirigido", "espiral", "espiral_doble", "flor_giratoria" };
-    static readonly string[] NombresFase2Validos = { "barrido_simple", "cruz", "corredor", "abanico", "tela_radial", "espiral_giratoria" };
+    static readonly string[] NombresFase2Validos = { "barrido_simple", "cruz", "corredor", "abanico", "tela_radial", "espiral_giratoria", "nodos_itinerantes" };
 
     [MenuItem("Enjambre/Debug/Verificar Telemetría de Patrones Nivel 2")]
     public static void Verificar()
@@ -81,7 +81,7 @@ public static class VerificarTelemetriaPatronesNivel2
         }
         Debug.Log($"DispararPatronLaserFase2(), 30 tiradas: nombres inválidos/vacíos={invalidos} (esperado 0)" + (invalidos > 0 ? $", último inválido=\"{ultimoInvalido}\"" : ""));
         if (invalidos > 0)
-            Debug.LogError("FALLÓ: DispararPatronLaserFase2 debería devolver siempre uno de los 4 nombres reusados del viejo Show de Láseres.");
+            Debug.LogError("FALLÓ: DispararPatronLaserFase2 debería devolver siempre uno de los nombres conocidos (4 heredados + los propios del boss).");
         else
             Debug.Log("OK: DispararPatronLaserFase2 siempre devuelve el nombre del patrón que de verdad disparó.");
     }

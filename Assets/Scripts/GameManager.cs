@@ -1967,6 +1967,12 @@ public class GameManager : MonoBehaviour
         Agregar("abanico", PatronAbanico, 1f);
         Agregar("tela_radial", PatronTelaRadialFase2, climax ? 2.2f : 1.2f);
         Agregar("espiral_giratoria", PatronEspiralGiratoriaFase2, climax ? 2.2f : 1.0f);
+        // Peso PAREJO climax/normal a propósito (no como tela_radial/
+        // espiral_giratoria): este patrón es "variedad general" del
+        // escenario, no "el ataque más difícil del clímax" — no compite
+        // por el mismo rol, así que no tiene sentido sesgarlo hacia el
+        // clímax también.
+        Agregar("nodos_itinerantes", PatronNodosItinerantesFase2, 1.5f);
 
         float total = 0f;
         foreach (var (_, _, peso) in opcionesPatronFase2) total += peso;
@@ -2074,6 +2080,49 @@ public class GameManager : MonoBehaviour
                 CrearRayoConOjoSeguroNivel2(origen, angulo, largo);
             }
             yield return new WaitForSeconds(esperaEntreOleadas);
+        }
+    }
+
+    // Patrón propio — Nodos Itinerantes: pedido vía revisión (feedback
+    // jugando: "podría haber más variaciones en el mapa para que el
+    // jugador no solo se quede en una esquina"). A diferencia de Tela
+    // Radial/Espiral Giratoria (todo sale del boss), acá NO se llama
+    // LanzarHechizo ni se usa PosicionOrigenBoss a propósito — es "el
+    // escenario" atacando, no el boss, así que el jugador tiene que mirar
+    // varios puntos de la PANTALLA a la vez, no solo al boss. nodosItinerantesNivel2
+    // nodos aparecen en posiciones distribuidas alrededor del centro del
+    // MAPA (elipse proporcional a mitadAncho/mitadAlto, no un círculo —
+    // si no, la mitad de los nodos nacían fuera de lo que la cámara
+    // llega a mostrar), cada uno dispara en una dirección
+    // INDEPENDIENTE al azar — a propósito NO todos apuntan al centro:
+    // 3 rectas con orígenes y ángulos independientes casi nunca
+    // convergen en un punto común (a diferencia de Tela Radial, que si
+    // pasa por el mismo origen), así que no hace falta ningún "ojo
+    // seguro" acá — geométricamente, 3 rectas nunca alcanzan a tapar
+    // todo el plano.
+    [Header("Nivel 2 — Nodos Itinerantes, patrón propio sin origen en el boss (revisión)")]
+    public int nodosItinerantesNivel2 = 3;
+    public float factorRadioNodosItinerantesNivel2 = 0.7f; // fracción de mitadAncho/mitadAlto — mantiene los nodos siempre visibles
+    public float anchoRayoNodoItineranteNivel2 = 0.4f;
+
+    void PatronNodosItinerantesFase2()
+    {
+        float largo = Mathf.Max(mitadAncho, mitadAlto) * 2.6f;
+        float anguloBase = Random.Range(0f, 360f);
+        float pasoEntreNodos = 360f / nodosItinerantesNivel2;
+        BeepSynth.Instancia?.Beep(120f, 0.3f, BeepSynth.Onda.Sierra, 0.22f);
+        for (int i = 0; i < nodosItinerantesNivel2; i++)
+        {
+            // Jitter (±15°) para que la distribución no sea siempre
+            // perfectamente regular — sigue garantizando separación
+            // mínima real entre nodos (pasoEntreNodos con 3 nodos = 120°,
+            // el jitter nunca los acerca a menos de 90°).
+            float anguloPosicion = anguloBase + i * pasoEntreNodos + Random.Range(-15f, 15f);
+            float rad = anguloPosicion * Mathf.Deg2Rad;
+            Vector2 posNodo = new Vector2(Mathf.Cos(rad) * mitadAncho * factorRadioNodosItinerantesNivel2, Mathf.Sin(rad) * mitadAlto * factorRadioNodosItinerantesNivel2);
+            float anguloDisparo = Random.Range(0f, 360f); // independiente del ángulo de posición — sin converger a ningún punto común
+            EfectosVisuales.Instancia?.Onda(posNodo, ColorLaserFase2, 1f);
+            CrearMuroLaserRotado(posNodo, new Vector2(anchoRayoNodoItineranteNivel2, largo), anguloDisparo, ColorLaserFase2, telegraphShowLaser, duracionActivoShowLaser);
         }
     }
 
