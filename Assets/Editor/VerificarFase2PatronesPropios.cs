@@ -146,7 +146,20 @@ public static class VerificarFase2PatronesPropios
             Debug.Log("OK: Espiral Giratoria dispara su primera oleada completa de inmediato — el giro entre oleadas sale de escalonar el disparo en el tiempo, no de rotar una pared ya viva.");
     }
 
-    /// <summary>Los 2 patrones propios tienen que pesar más en el clímax (112-128s) — "el tramo más difícil del nivel" (pedido explícito). Estadístico con margen grande a propósito (68.75% vs 42.3% esperado en teoría, con 300 tiradas por lado el ruido no alcanza a cruzar un margen de 15 puntos).</summary>
+    /// <summary>
+    /// Los 2 patrones propios tienen que pesar más en el clímax (112-128s)
+    /// — "el tramo más difícil del nivel" (pedido explícito). Estadístico,
+    /// con margen calculado de los pesos REALES del código (no a ojo — un
+    /// primer cálculo puesto acá decía "68.75% vs 42.3%", pero con los
+    /// pesos que el código realmente usa (1,1,1,1,2.2,2.2 en clímax;
+    /// 1,1,1,1,1.2,1.0 fuera) el valor real es 52.4% vs 35.5% — una
+    /// diferencia real de ~17 puntos, no ~26. Ese cálculo mal hecho dejaba
+    /// un umbral de 15 puntos con casi nada de colchón contra el ruido
+    /// estadístico de N=300 (~4 puntos de desvío estándar combinado) —
+    /// fallaba de verdad, no era flaky. 8 puntos deja colchón real (~9
+    /// puntos por debajo del valor esperado) sin dejar de detectar una
+    /// regresión real de los pesos.
+    /// </summary>
     static void PruebaClimaxFavoreceLosPatronesPropios()
     {
         var gm = AbrirEscenaFresca();
@@ -158,8 +171,8 @@ public static class VerificarFase2PatronesPropios
         float fraccionClimax = propiosClimax / 300f;
         float fraccionNormal = propiosNormal / 300f;
 
-        Debug.Log($"Fracción de patrones propios elegidos: clímax={fraccionClimax:P0} ({propiosClimax}/300), fuera de clímax={fraccionNormal:P0} ({propiosNormal}/300) — esperado clímax al menos 15 puntos por encima");
-        if (fraccionClimax < fraccionNormal + 0.15f)
+        Debug.Log($"Fracción de patrones propios elegidos: clímax={fraccionClimax:P0} ({propiosClimax}/300), fuera de clímax={fraccionNormal:P0} ({propiosNormal}/300) — esperado clímax al menos 8 puntos por encima");
+        if (fraccionClimax < fraccionNormal + 0.08f)
             Debug.LogError("FALLÓ: en el clímax, los patrones propios del boss deberían salir notablemente más seguido que fuera de él.");
         else
             Debug.Log("OK: el clímax favorece de verdad los patrones propios del boss sobre los 4 heredados.");

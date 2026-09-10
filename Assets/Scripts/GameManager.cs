@@ -1004,7 +1004,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>Mueve y resuelve colisión/despawn de todas las balas activas — un solo loop, mismo lenguaje que ActualizarGridSeparacion.</summary>
+    /// <summary>
+    /// Mueve y resuelve colisión/despawn de todas las balas activas — un
+    /// solo loop, mismo lenguaje que ActualizarGridSeparacion.
+    ///
+    /// Bug real encontrado jugando (2026-09-10, ArgumentOutOfRangeException
+    /// real en el log del Editor): si el golpe que agota la ÚLTIMA vida del
+    /// jugador viene de un proyectil, RecibirGolpe dispara AlQuedarSinVidas
+    /// -> ManejarDerrotaNivel2 -> TerminarPeleaNivel2 SÍNCRONAMENTE, DENTRO
+    /// de este mismo loop — y TerminarPeleaNivel2 llama LimpiarProyectiles(),
+    /// que vacía proyectilesActivos por completo. Cuando el control vuelve
+    /// acá, el DevolverProyectil(i) de abajo intenta indexar una lista que
+    /// ya no tiene ese índice (o ninguno). Chequear el índice contra el
+    /// Count ACTUAL (no PeleaActiva — un primer intento con ese flag
+    /// rompía el caso normal en batch mode, donde arranca en false y
+    /// nunca lo pone nadie en true) detecta la reentrancia sin depender de
+    /// nada más que la propia lista.
+    /// </summary>
     void ActualizarProyectiles()
     {
         float dt = Time.deltaTime;
@@ -1021,6 +1037,7 @@ public class GameManager : MonoBehaviour
             if (formaPrecisaActiva != null && Vector2.Distance(pos, formaPrecisaActiva.transform.position) < p.radioHitbox + formaPrecisaActiva.radioHitbox)
             {
                 formaPrecisaActiva.RecibirGolpe($"proyectil_fase{TierPatronesActualNivel2(tPelea)}");
+                if (i >= proyectilesActivos.Count) return; // ver el comentario de arriba — si esto disparó la derrota, proyectilesActivos ya fue vaciada, este índice ya no existe
                 DevolverProyectil(i);
             }
         }
