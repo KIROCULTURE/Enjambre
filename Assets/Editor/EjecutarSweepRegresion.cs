@@ -36,6 +36,7 @@ public static class EjecutarSweepRegresion
         Correr("VerificarTelemetriaPatronesNivel2", VerificarTelemetriaPatronesNivel2.Verificar);
         Correr("VerificarFase2PatronesPropios", VerificarFase2PatronesPropios.Verificar);
         Correr("VerificarColapsoAgonicoNivel2", VerificarColapsoAgonicoNivel2.Verificar);
+        Correr("VerificarLimpiezaLaseresNivel2", VerificarLimpiezaLaseresNivel2.Verificar);
 
         Debug.Log("===== BARRIDO COMPLETO TERMINADO =====");
     }

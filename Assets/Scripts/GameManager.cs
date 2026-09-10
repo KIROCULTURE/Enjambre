@@ -975,6 +975,35 @@ public class GameManager : MonoBehaviour
         for (int i = proyectilesActivos.Count - 1; i >= 0; i--) DevolverProyectil(i);
     }
 
+    /// <summary>
+    /// Bug real encontrado (revisión nocturna, Prioridad 3): a diferencia
+    /// de los proyectiles (pooled, LimpiarProyectiles los devuelve todos),
+    /// los LaserHazard vivos NO se limpiaban al terminar la pelea —
+    /// ResolverImpactoLaser no chequea PeleaActiva, así que una pared que
+    /// ya estaba en telegraph justo cuando sonó la victoria podía seguir
+    /// resolviendo su impacto DURANTE la cutscene de cierre, restándole
+    /// una vida "fantasma" al jugador que ya había ganado (el guard de
+    /// ManejarDerrotaNivel2 evita que eso rompa el flujo si llega a 0,
+    /// pero el golpe igual se sentía y quedaba en la telemetría). Se llama
+    /// tanto en la victoria como en el cierre general, mismo criterio que
+    /// LimpiarProyectiles.
+    /// </summary>
+    void LimpiarLaseresActivosNivel2()
+    {
+        foreach (var muro in FindObjectsByType<LaserHazard>(FindObjectsSortMode.None))
+        {
+            // SetActive(false) ANTES de Destroy(): Destroy() es diferido
+            // (no saca el objeto de FindObjectsByType hasta terminar el
+            // frame, mismo motivo documentado en AsegurarSuperAdministradorNivel2
+            // con Orbe.recolectado) — desactivarlo primero lo saca de
+            // inmediato de cualquier FindObjectsByType<LaserHazard> con el
+            // default (excluye inactivos), sin tener que tocar LaserHazard.cs
+            // para agregarle un flag propio.
+            muro.gameObject.SetActive(false);
+            Destroy(muro.gameObject);
+        }
+    }
+
     /// <summary>Mueve y resuelve colisión/despawn de todas las balas activas — un solo loop, mismo lenguaje que ActualizarGridSeparacion.</summary>
     void ActualizarProyectiles()
     {
@@ -2292,7 +2321,19 @@ public class GameManager : MonoBehaviour
     void PeleaNivel2Victoria()
     {
         PeleaActiva = false;
+        // Bug real (revisión nocturna, Prioridad 3): los patrones fire-
+        // and-forget (Abanico/EspiralDoble/EspiralGiratoria/FlorGiratoria/
+        // etc.) se disparan con StartCoroutine sin esperarlos — si la
+        // canción termina justo cuando uno de esos todavía tiene oleadas
+        // pendientes, seguía vivo DESPUÉS de la victoria y seguía creando
+        // proyectiles/paredes contra un jugador que ya había ganado.
+        // Seguro llamarlo acá aunque este mismo método corra dentro de
+        // FaseLaseresYVictoriaNivel2 (una corrutina): no hay más código
+        // después de esta línea en esa corrutina, cortarla no cambia nada
+        // observable — mismo criterio que ya usa TerminarPeleaNivel2.
+        StopAllCoroutines();
         LimpiarProyectiles();
+        LimpiarLaseresActivosNivel2();
         estado = EstadoJuego.Cutscene;
         enCutsceneCierre = true;
         if (panelCutsceneNivel2 != null) panelCutsceneNivel2.SetActive(true);
@@ -2490,6 +2531,7 @@ public class GameManager : MonoBehaviour
         if (formaPrecisaActiva != null) formaPrecisaActiva.AlQuedarSinVidas -= ManejarDerrotaNivel2;
         StopAllCoroutines(); // corta PeleaNivel2()/la cutscene de cierre y cualquier patrón (Anillo/Espiral/Abanico/etc) en curso
         LimpiarProyectiles();
+        LimpiarLaseresActivosNivel2(); // ver su comentario — StopAllCoroutines no los toca, son GameObjects con su propia corrutina, no corrutinas de GameManager
         if (panelVidaBossNivel2 != null) panelVidaBossNivel2.SetActive(false);
         // Mismo leak que ya se vio con Fundir()/la Forma Precisa/el boss:
         // si el jugador muere a un proyectil que ya estaba en el aire
@@ -3083,6 +3125,15 @@ public class GameManager : MonoBehaviour
         if (panelTerminalNivel2 != null) panelTerminalNivel2.SetActive(false);
         if (botonSaltarTerminalNivel2 != null) botonSaltarTerminalNivel2.SetActive(false);
         LimpiarProyectiles();
+        // Bug real (revisión nocturna, Prioridad 3): a diferencia de los
+        // proyectiles (pooled), los LaserHazard vivos NO se limpiaban acá
+        // — si el jugador volvía al menú (Pausa -> Menú) justo cuando
+        // había una pared telegrafiando/activa, quedaba huérfana: su
+        // corrutina vive en su PROPIO GameObject, no en GameManager, así
+        // que StopAllCoroutines() de más abajo no la toca. Se autodestruía
+        // sola eventualmente, pero mientras tanto podía seguir sonando/
+        // resolviendo en el menú.
+        LimpiarLaseresActivosNivel2();
         saltandoCutscene = false;
         cutsceneCoroutine = null;
         enCutsceneCierre = false;
